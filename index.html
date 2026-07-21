@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mangrove g7</title>
+    
+    <!-- LINK TO FAVICON -->
+    <link rel="icon" href="favicon.jpg" type="image/jpeg">
+    
+    <!-- CANVAS CONFETTI LIBRARY -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        /* HIDE DEFAULT CURSOR */
+        html, body, button, a, img, input {
+            cursor: none !important;
+        }
+
+        :root {
+            --bg-overlay: rgba(255, 255, 255, 0.9);
+            --text-color: #111;
+            --card-bg: white;
+            --accent-green: #4CAF50;
+            --hover-green: #388E3C;
+            --header-green: #2E7D32;
+            --border-color: #e0e0e0;
+        }
+
+        body.dark-mode {
+            --bg-overlay: rgba(20, 30, 20, 0.92);
+            --text-color: #e0e0e0;
+            --card-bg: #1c261c;
+            --accent-green: #66bb6a;
+            --hover-green: #4caf50;
+            --header-green: #81c784;
+            --border-color: #2e3d2e;
+        }
+
+        body {
+            background-image: url('mng.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* CUSTOM ANIMATED CURSOR */
+        .custom-cursor {
+            width: 32px;
+            height: 32px;
+            position: fixed;
+            background-image: url('crs.gif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none !important;
+            z-index: 999999;
+            transform: translate(-50%, -50%);
+            left: -100px;
+            top: -100px;
+        }
+
+        /* GREEN TRAIL PARTICLES */
+        .trail-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none !important;
+            z-index: 999998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 1;
+        }
+
+        /* Content Container */
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--bg-overlay);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+            transition: background-color 0.3s;
+        }
+
+        /* FUN FACTS BANNER */
+        .facts-ticker {
+            background-color: rgba(76, 175, 80, 0.15);
+            border: 2px dashed var(--accent-green);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin: 15px auto 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            max-width: 650px;
+        }
+
+        .facts-text {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--header-green);
+            text-align: center;
+            flex-grow: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .fact-nav-btn {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .fact-nav-btn:hover {
+            background: var(--hover-green);
+            transform: scale(1.1);
+        }
+
+        /* SEARCH BAR STYLES */
+        .search-bar-container {
+            text-align: center;
+            margin: 20px 0 15px 0;
+        }
+
+        .search-input {
+            width: 85%;
+            max-width: 450px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid var(--accent-green);
+            font-size: 1rem;
+            outline: none;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .search-input:focus {
+            border-color: var(--header-green);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        /* CATEGORY FILTER CHIPS */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .filter-btn {
+            background-color: transparent;
+            border: 2px solid var(--accent-green);
+            color: var(--text-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--accent-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* RANDOM PICKER BUTTON */
+        .random-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .random-btn {
+            background: linear-gradient(135deg, #FF8C00, #FFD700);
+            color: #111;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(255, 140, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .random-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.5);
+        }
+
+        /* SHOWCASE ITEM HIGHLIGHT ANIMATION */
+        .showcase-item {
+            transition: transform 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .showcase-item.highlight {
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            transform: scale(1.02);
+        }
+
+        h4 {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: normal;
+            font-size: 1.1rem;
+        }
+        
+        .spacer {
+            height: 30px;
+        }
+
+        /* SECTION TRANSITION TITLE */
+        .section-transition {
+            text-align: center;
+            font-size: 1.8rem;
+            color: var(--header-green);
+            margin: 50px 0 30px 0;
+            padding-top: 20px;
+            border-top: 3px dashed var(--accent-green);
+            font-weight: bold;
+        }
+
+        /* PHOTO ITEM CARD STYLES */
+        .photo-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .photo-card img {
+            display: block;
+            max-width: 100%;
+            max-height: 450px;
+            height: auto;
+            margin: 15px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .multi-img-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .multi-img-container img {
+            max-width: 30%;
+            min-width: 200px;
+            flex: 1;
+        }
+
+        /* Attribution Row */
+        .attribution-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .attribution {
+            margin: 0;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* Buttons Base Style */
+        button {
+            pointer-events: auto !important;
+            user-select: none;
+        }
+
+        /* Buttons */
+        .info-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.2s, transform 0.1s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .info-btn:hover {
+            background-color: var(--hover-green);
+            transform: scale(1.05);
+        }
+
+        .share-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .share-btn:hover {
+            background-color: #1976D2;
+            transform: scale(1.05);
+        }
+
+        .speech-btn {
+            background-color: #9C27B0;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .speech-btn:hover {
+            background-color: #7B1FA2;
+            transform: scale(1.05);
+        }
+
+        /* TOGGLEABLE LIKE BUTTON */
+        .like-btn {
+            background-color: #757575;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .like-btn.liked {
+            background-color: #E91E63;
+            box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+        }
+
+        /* FLOATING +1 ANIMATION */
+        .plus-one {
+            position: absolute;
+            color: #E91E63;
+            font-weight: bold;
+            font-size: 1.2rem;
+            pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.5); }
+        }
+
+        /* FIXED FLOATING BUTTONS */
+        .top-right-info-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background-color: var(--header-green);
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .top-right-info-btn:hover {
+            background-color: var(--hover-green);
+            transform: scale(1.05);
+        }
+
+        .top-left-theme-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .top-left-theme-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* FULL PAGE DIRECTORY OVERLAY */
+        .full-page-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-overlay);
+            z-index: 20000;
+            overflow-y: auto;
+            padding: 50px 20px;
+            box-sizing: border-box;
+        }
+
+        .overlay-container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 20001;
+        }
+
+        .back-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            transition: background 0.2s, transform 0.1s;
+            position: relative;
+            z-index: 20002;
+        }
+
+        .back-btn:hover {
+            background-color: var(--hover-green);
+            transform: scale(1.03);
+        }
+
+        .directory-list {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+        }
+
+        .directory-list li {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Info Modal Overlay Styles */
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 30000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 30001;
+        }
+
+        .modal-close {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: background 0.2s;
+            position: relative;
+            z-index: 30002;
+        }
+
+        .modal-close:hover {
+            background-color: #c0392b;
+        }
+
+        .tanush-bio-card {
+            background-color: rgba(76, 175, 80, 0.15);
+            border-left: 5px solid var(--accent-green);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 35px;
+        }
+
+        .tanush-bio-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--header-green);
+            font-weight: bold;
+        }
+
+        .tanush-bio-card p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* TOAST NOTIFICATION */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 20px;
+            padding: 12px;
+            position: fixed;
+            z-index: 99999;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.5s 2s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP LEFT THEME TOGGLE BUTTON -->
+<button class="top-left-theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+<!-- TOP RIGHT INFO BUTTON -->
+<button class="top-right-info-btn" onclick="openFullPageInfo()">ℹ️ Info & Directory</button>
+
+<!-- CUSTOM CURSOR -->
+<div class="custom-cursor"></div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast">Link copied to clipboard! 🔗</div>
+
+<!-- Single Info Modal Framework -->
+<div id="infoModal" class="info-modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Info Tab</h3>
+        <p id="modalText">Information content goes here.</p>
+        <button class="modal-close" onclick="closeInfo()">Close</button>
+    </div>
+</div>
+
+<!-- FULL PAGE DIRECTORY & BIO OVERLAY -->
+<div id="fullPageOverlay" class="full-page-overlay">
+    <div class="overlay-container">
+        <button class="back-btn" onclick="closeFullPageInfo()">← Back to Showcase</button>
+
+        <h1 style="text-align: center; color: var(--header-green); margin-top: 0;">Classroom Showcase Directory</h1>
+        <p style="text-align: center; opacity: 0.8;">A complete list of Grade 7 student works featured on this website.</p>
+
+        <ul class="directory-list">
+            <li>
+                <span><strong>A Poem on Saving Mangrove Trees</strong> — by Aahaan Mudgil</span>
+                <button class="info-btn" onclick="openInfo('Aahaan Mudgil\'s Poem', 'This entry explores the environmental shield role of mangrove trees, focusing on their carbon retention capabilities and storm defence value.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>The Mangrove Heroes</strong> — by Akshaj</span>
+                <button class="info-btn" onclick="openInfo('Akshaj\'s Story', 'A recount of a Grade 7 educational field trip transformed into an actionable environmental cleanup effort on World Mangrove Day.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>Anchors of the Coast</strong> — by Tarunika Hariharan</span>
+                <button class="info-btn" onclick="openInfo('Tarunika Hariharan\'s Poem', 'A rhythmic depiction capturing the literal tenacity and architectural strength of estuarine root systems.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>Mangrove Day Story</strong> — by Kyra Bagga</span>
+                <button class="info-btn" onclick="openInfo('Kyra Bagga\'s Story', 'A story following the sapling Mino that emphasizes how collective ecosystem structures hold deep value despite small beginnings.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>Poem</strong> — by Kyra Bagga</span>
+                <button class="info-btn" onclick="openInfo('Kyra Bagga\'s Poem', 'A rhythmic ode outlining the nursery aspect of intertidal wetlands and human responsibilities regarding local conversation.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>The Swamp Is Watching</strong> — by Lasyaa Priya</span>
+                <button class="info-btn" onclick="openInfo('Lasyaa Priya\'s Story', 'A suspenseful, horror-infused narrative framing the swamp environment as an active, breathing organism.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>Guardians of the Coast</strong> — by Aahana Aurora and Pragya Balaji</span>
+                <button class="info-btn" onclick="openInfo('Aahana Aurora & Pragya Balaji\'s Work', 'A collaborative poetic reminder highlighting structural conflicts between commercial needs and delicate coastal biology.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>The Magic of Mangrove Trees</strong> — by Sahasra Reddy Kothapali</span>
+                <button class="info-btn" onclick="openInfo('Sahasra Reddy Kothapali\'s Poem', 'Focuses on the filtration capabilities of wetlands and their stabilization mechanics against dynamic oceans.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>The Untold Tale</strong> — by Sunaina Baral</span>
+                <button class="info-btn" onclick="openInfo('Sunaina Baral\'s Poem', 'Written from a first-person perspective, personifying the mangrove tree as it protects humanity from the elements.')">More Info</button>
+            </li>
+            <li>
+                <span><strong>Guardians of the Coast</strong> — by Thiya Rajrendra</span>
+                <button class="info-btn" onclick="openInfo('Thiya Rajrendra\'s Poem', 'An exploration detailing the biological resilience required for survival within harsh saltwater conditions.')">More Info</button>
+            </li>
+        </ul>
+
+        <div class="tanush-bio-card">
+            <h3>About This Website</h3>
+            <p>This website was designed and coded by <strong>Tanush Pandey (tandash)</strong>. Inspired by the creativity of his Grade 7 classmates, Tanush built this platform to showcase their wonderful poems, stories, and artwork so everyone could enjoy them together!</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-container">
+
+    <h1 style="text-align: center; color: var(--header-green); margin-bottom: 5px;">The Mangroves</h1>
+    
+    <!-- MANGROVE FUN FACTS BANNER -->
+    <div class="facts-ticker">
+        <button class="fact-nav-btn" onclick="prevFact()">❮</button>
+        <span class="facts-text" id="factText">💡 Fact: Mangroves store up to 4 times more carbon than tropical rainforests!</span>
+        <button class="fact-nav-btn" onclick="nextFact()">❯</button>
+    </div>
+
+    <!-- LIVE SEARCH BAR -->
+    <div class="search-bar-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search works or student names..." onkeyup="filterShowcase()">
+    </div>
+
+    <!-- CATEGORY FILTER CHIPS -->
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterCategory('all', this)">All</button>
+        <button class="filter-btn" onclick="filterCategory('poem', this)">📜 Poems</button>
+        <button class="filter-btn" onclick="filterCategory('story', this)">📖 Stories</button>
+    </div>
+
+    <!-- RANDOM PICKER BUTTON -->
+    <div class="random-container">
+        <button class="random-btn" onclick="pickRandomWork()">🎲 Surprise Me! (Pick Random Work)</button>
+    </div>
+    
+    <!-- SHOWCASE ITEMS (STORIES & POEMS) -->
+    <div class="showcase-item" id="work-aahaan" data-category="poem">
+        <h3 style="text-align:center;"> A Poem on Saving Mangrove Trees </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left"> Mangroves stand where rivers meet the sea, a shield both strong and wise,</h4>
+            <h4 style="text-align:left"> Their tangled roots protect the shores while countless living creatures rise.</h4> 
+            <h4 style="text-align:left">They calm the waves, prevent erosion, and guard the land from storms; fierce might,</h4>
+            <h4 style="text-align:left">They store the Earths precious carbon, helping keep our future bright.</h4>
+            <h4 style="text-align:left"> Yet forests fall to careless hands, and wildlife loses home each day;</h4>
+            <h4 style="text-align:left"> Together we must plant, protect, and keep these green defenders safe always.</h4>
+            <h4 style="text-align:left"> By saving mangroves now with love, we nurture oceans, life, and air,</h4>
+            <h4 style="text-align:left"> For thriving mangroves mean a healthier world that every generation can share.</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Aahaan Mudgil</p>
+            <button class="info-btn" onclick="openInfo('Aahaan Mudgil\'s Poem', 'This entry explores the environmental shield role of mangrove trees, focusing on their carbon retention capabilities and storm defence value.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-aahaan')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-akshaj" data-category="story">
+        <h3 style="text-align:center"> The Mangrove Heroes </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left"> On World Mangrove Day, our Grade 7 class went on a field trip to a mangrove forest near the coast. We were excited to learn about these unique trees. Our guide explained that mangroves protect the shoreline from strong waves and storms, provide shelter for fish, crabs, and birds, and help fight climate change by storing large amounts of carbon.
+            As we walked along the wooden bridge, we saw many different plants and animals living among the tangled roots. However, we also noticed plastic bottles, bags, and food wrappers caught in the trees. We felt sad because pollution was harming this beautiful habitat.
+            With our teacher's permission, we put on gloves and carefully collected the litter. We separated the waste into recyclable and non-recyclable bags. After a while, the mangrove forest looked much cleaner. The guide thanked us and reminded us that protecting nature begins with small actions.
+            Before returning to school, each of us planted a young mangrove sapling and promised to reduce plastic use, recycle more, and encourage our families and friends to care for the environment. That day, we learned that mangroves are not just trees—they are protectors of nature and our future.
+            From then on, our class proudly called ourselves the Mangrove Heroes, because we knew that even small efforts can make a big difference. </h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Akshaj</p>
+            <button class="info-btn" onclick="openInfo('Akshaj\'s Story', 'A recount of a Grade 7 educational field trip transformed into an actionable environmental cleanup effort on World Mangrove Day.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-akshaj')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-taarunika" data-category="poem">
+        <h3 style="text-align:center;"> Anchors of the Coast </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;"> Between the changing tide and shore,</h4>
+            <h4 style="text-align:left;"> The mangrove thrives where oceans roar.</h4>
+            <h4 style="text-align:left;"> It drinks the brine with secret grace,</h4>
+            <h4 style="text-align:left;"> And blooms within a salty space .</h4>
+            <h4 style="text-align:left;"> With breathing roots that seek the air,</h4>
+            <h4 style="text-align:left;"> It stands robust against despair.</h4>
+            <h4 style="text-align:left;"> A living wall of green and wood,</h4>
+            <h4 style="text-align:left;"> That guards the coast where others stood.</h4>
+            <h4 style="text-align:left;"> From parent branch, the seedlings grow,</h4>
+            <h4 style="text-align:left;"> Prepared before they drop below.</h4>
+            <h4 style="text-align:left;"> To float away or pierce the mud,</h4>
+            <h4 style="text-align:left;"> And ride the rushing summer flood.</h4>
+            <h4 style="text-align:left;"> A nursery for the wild and small,</h4>
+            <h4 style="text-align:left;"> The strongest anchor of them all.</h4>
+            <h4 style="text-align:left;"> It holds the earth and tames the sea,</h4>
+            <h4 style="text-align:left;"> A monument of constancy.</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Tarunika Hariharan</p>
+            <button class="info-btn" onclick="openInfo('Tarunika Hariharan\'s Poem', 'A rhythmic depiction capturing the literal tenacity and architectural strength of estuarine root systems.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-taarunika')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-kyra-story" data-category="story">
+        <h3 style="text-align:center;"> Mangrove Day Story </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;"> Long ago, near a beautiful seashore, a tiny mangrove sapling named Mino grew in the muddy ground. He was much smaller than the tall trees around him.
+            One day, Mino sighed, "I am so small. I cannot help anyone."
+            An old mangrove tree smiled and said, "Be patient. Every tree has an important job."
+            A few weeks later, dark clouds covered the sky. Strong winds blew, and huge waves rushed toward the shore. The animals were frightened.
+            The fish hid among the mangrove roots. Crabs burrowed into the mud. Birds rested safely on the branches.
+            Mino stretched his little roots as much as he could. Together with the other mangrove trees, he helped hold the soil in place.
+            After the storm, the village was safe. The people came to thank the mangrove forest.
+            A fisherman said, "These trees protected our homes from the strong waves."
+            Mino felt proud. Even though he was small, he had helped protect the shore.
+            From that day on, Mino understood that every mangrove tree, big or small, plays an important role in nature. </h4>
+            <h4 style="text-align:left;"> <strong>Moral:</strong> No contribution is too small when helping nature. </h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Kyra Bagga</p>
+            <button class="info-btn" onclick="openInfo('Kyra Bagga\'s Story', 'A story following the sapling Mino that emphasizes how collective ecosystem structures hold deep value despite small beginnings.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-kyra-story')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-kyra-poem" data-category="poem">
+        <h3 style="text-align:center;"> Poem </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;"> By the sea, so strong and wide,</h4>
+            <h4 style="text-align:left;"> Mangrove trees stand side by side.</h4>
+            <h4 style="text-align:left;"> Their roots grow deep, their branches sway,</h4>
+            <h4 style="text-align:left;"> Protecting shores every day.</h4>
+            <h4 style="text-align:left;"> They give shelter to fish and crabs,</h4>
+            <h4 style="text-align:left;"> And help many birds build nests.</h4>
+            <h4 style="text-align:left;"> They clean the water, stop the tide,</h4>
+            <h4 style="text-align:left;"> Keeping nature safe with pride.</h4>
+            <h4 style="text-align:left;"> Mangroves fight against the storm,</h4>
+            <h4 style="text-align:left;"> Keeping beaches safe and warm.</h4>
+            <h4 style="text-align:left;"> They store carbon from the air,</h4>
+            <h4 style="text-align:left;"> Helping Earth with loving care.</h4>
+            <h4 style="text-align:left;"> On Mangrove Day, let's all agree,</h4>
+            <h4 style="text-align:left;"> To protect each mangrove tree.</h4>
+            <h4 style="text-align:left;"> For a greener, brighter way,</h4>
+            <h4 style="text-align:left;"> Let's save mangroves every day!</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Kyra Bagga</p>
+            <button class="info-btn" onclick="openInfo('Kyra Bagga\'s Poem', 'A rhythmic ode outlining the nursery aspect of intertidal wetlands and human responsibilities regarding local conversation.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-kyra-poem')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-laasya" data-category="story">
+        <h3 style="text-align:center;"> The Swamp Is Watching </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;">I ignored the warning signs and paddled my kayak deep into the creepy coastal swamp after dark.My flashlight flickered, shining on a massive mangrove tree whose roots looked exactly like giant, creeping hands.I froze when I saw it—a grumpy, weathered face was molded right into the wooden trunk, staring straight at me with hollow eyes.Before I could even scream, the tangled roots actually moved, slowly stretching out to block my only escape route.Salty water dripped from its waxy leaves like sweat, splashing onto my face as the wooden giant hissed in the wind."No one leaves my swamp," a raspy voice whispered from the deep mud, vibrating right through my plastic kayak.I paddled frantically, but the wooden fingers clamped down on my blade, dragging me backward into the dark shadows. </h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Lasyaa Priya</p>
+            <button class="info-btn" onclick="openInfo('Lasyaa Priya\'s Story', 'A suspenseful, horror-infused narrative framing the swamp environment as an active, breathing organism.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-laasya')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-pragya-ahaana" data-category="poem">
+        <h3 style="text-align:center;"> Guardians of the Coast </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;"> Day by day, mangroves grow tall, </h4>
+            <h4 style="text-align:left;"> But day by day, we make them fall.</h4>
+            <h4 style="text-align:left;"> Protect the trees; they deserve much better,</h4>
+            <h4 style="text-align:left;"> There are many other ways to make a letter.</h4>
+            <h4 style="text-align:left;"> Mangrove roots unite as one,</h4>
+            <h4 style="text-align:left;"> Protecting coasts and helping a ton.</h4>
+            <h4 style="text-align:left;"> Sheltering fish, crabs, and shrimp,</h4>
+            <h4 style="text-align:left;"> They give us much, yet still we skimp.</h4>
+            <h4 style="text-align:left;"> Mangrove trees are nature’s treasure,</h4>
+            <h4 style="text-align:left;"> But we hurt them just for pleasure.</h4>
+            <h4 style="text-align:left;"> Trees like these are worth saving,</h4>
+            <h4 style="text-align:left;"> So let’s act before the world starts fading.</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Aahana Aurora and Pragya Balaji</p>
+            <button class="info-btn" onclick="openInfo('Aahana Aurora & Pragya Balaji\'s Work', 'A collaborative poetic reminder highlighting structural conflicts between commercial needs and delicate coastal biology.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-pragya-ahaana')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-sahasra" data-category="poem">
+        <h3 style="text-align:center;"> The Magic of Mangrove Trees </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;"> Mangrove trees stand strong by the sea,</h4>
+            <h4 style="text-align:left;"> A safe and happy home for you and me.</h4>
+            <h4 style="text-align:left;"> Their tangled roots hold the soil tight,</h4>
+            <h4 style="text-align:left;"> Protecting the shores day and night.</h4>
+            <h4 style="text-align:left;"> They shelter fish, birds, and crabs with care,</h4>
+            <h4 style="text-align:left;"> Giving many animals food to share.</h4>
+            <h4 style="text-align:left;"> They clean the air and keep waters clear,</h4>
+            <h4 style="text-align:left;"> Helping nature throughout the year.</h4>
+            <h4 style="text-align:left;"> Let's protect mangroves, both old and new,</h4>
+            <h4 style="text-align:left;"> For a greener Earth for me and you.</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Sahasra Reddy Kothapali</p>
+            <button class="info-btn" onclick="openInfo('Sahasra Reddy Kothapali\'s Poem', 'Focuses on the filtration capabilities of wetlands and their stabilization mechanics against dynamic oceans.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-sahasra')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-sunaina" data-category="poem">
+        <h3 style="text-align:center;"> The Untold Tale </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;">I, the mangrove, stand so old, </h4>
+            <h4 style="text-align:left;">In slimy mud and water cold. </h4>
+            <h4 style="text-align:left;">My spikey roots poke up to breathe, </h4>
+            <h4 style="text-align:left;">While heavy shadows slowly creep. </h4>
+            <h4 style="text-align:left;">I catch the dirt and trap the sand, </h4>
+            <h4 style="text-align:left;">To stop the water eating land. </h4>
+            <h4 style="text-align:left;">I block the giant crashing waves, </h4>
+            <h4 style="text-align:left;">And hold the soil in muddy graves. </h4>
+            <h4 style="text-align:left;">My tangled arms fight wind and storm, </h4>
+            <h4 style="text-align:left;">To keep the houses safe and warm. </h4>
+            <h4 style="text-align:left;">The fish and crabs hide in my vest, </h4>
+            <h4 style="text-align:left;">Where baby animals can rest. </h4>
+            <h4 style="text-align:left;">But people cut my branches down, </h4>
+            <h4 style="text-align:left;">To build their roads and expand their town. </h4>
+            <h4 style="text-align:left;">Then came a month they called July, </h4>
+            <h4 style="text-align:left;">Beneath the stormy, and thunderous sky. </h4>
+            <h4 style="text-align:left;">On World Mangrove Day, they understood, </h4>
+            <h4 style="text-align:left;">How much they need this dark, wet wood. </h4>
+            <h4 style="text-align:left;">Now children plant my seeds in slime, </h4>
+            <h4 style="text-align:left;">To save me from the end of time. </h4>
+            <h4 style="text-align:left;">Though I am gloomy, dark, and deep, </h4>
+            <h4 style="text-align:left;">I am the shield they need to keep. </h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Sunaina Baral</p>
+            <button class="info-btn" onclick="openInfo('Sunaina Baral\'s Poem', 'Written from a first-person perspective, personifying the mangrove tree as it protects humanity from the elements.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-sunaina')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+    
+    <div class="showcase-item" id="work-thiya" data-category="poem">
+        <h3 style="text-align:center;"> Guardians of the Coast </h3>
+        <div class="poem-body">
+            <h4 style="text-align:left;">At the edge where tides command,</h4>
+            <h4 style="text-align:left;">Stand the mangroves, proud and grand.</h4>
+            <h4 style="text-align:left;">Roots-like fingers, twisted deep,</h4>
+            <h4 style="text-align:left;">Secrets of the shore they keep.</h4>
+            <h4 style="text-align:left;">In salty water, still they grow,</h4>
+            <h4 style="text-align:left;">Where other trees would never go.</h4>
+            <h4 style="text-align:left;">They cradle fish, they shelter birds,</h4>
+            <h4 style="text-align:left;">ask the tide — it knows their words.</h4>
+            <h4 style="text-align:left;">They block the storms, they tame the wave,</h4>
+            <h4 style="text-align:left;">Brave green walls the coastlines save.</h4>
+            <h4 style="text-align:left;">They clean the water, trap the sand,</h4>
+            <h4 style="text-align:left;">Silent heroes of the land.</h4>
+            <h4 style="text-align:left;">Carbon keepers, breathing slow,</h4>
+            <h4 style="text-align:left;">Protecting life as sea tides flow.</h4>
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Thiya Rajrendra</p>
+            <button class="info-btn" onclick="openInfo('Thiya Rajrendra\'s Poem', 'An exploration detailing the biological resilience required for survival within harsh saltwater conditions.')">More Info</button>
+            <button class="speech-btn" onclick="readAloud(this)">🔊 Read Aloud</button>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('work-thiya')">🔗 Copy Link</button>
+        </div>
+        <div class="spacer"></div>
+    </div>
+
+    <!-- TRANSITION TEXT TO PHOTOS -->
+    <div class="section-transition">
+        📸 Moving on to the Photos... 🎨
+    </div>
+
+    <!-- PHOTO 1: MANGROVE DUDES -->
+    <div class="photo-card" id="photo-akshara">
+        <h3>Mangrove Dudes</h3>
+        <div class="multi-img-container">
+            <img src="aks-1.png" alt="Mangrove Dudes Part 1" onerror="this.onerror=null; this.src='https://placehold.co/400x300/2E7D32/white?text=🎨+Aks-1';">
+            <img src="aks-2.png" alt="Mangrove Dudes Part 2" onerror="this.onerror=null; this.src='https://placehold.co/400x300/2E7D32/white?text=🎨+Aks-2';">
+            <img src="aks-3.png" alt="Mangrove Dudes Part 3" onerror="this.onerror=null; this.src='https://placehold.co/400x300/2E7D32/white?text=🎨+Aks-3';">
+        </div>
+        <div class="attribution-row">
+            <p class="attribution">By Akshara Jadhav</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-akshara')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+    <!-- PHOTO 2: MANGROVE POSTER -->
+    <div class="photo-card" id="photo-kyra">
+        <h3>Mangrove Poster</h3>
+        <img src="kra-img.png" alt="Mangrove Poster" onerror="this.onerror=null; this.src='https://placehold.co/600x400/2E7D32/white?text=🎨+Kyra\'s+Poster';">
+        <div class="attribution-row">
+            <p class="attribution">By Kyra Bagga</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-kyra')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+    <!-- PHOTO 3: A MANGROVE TREE AND ITS FUNCTIONS -->
+    <div class="photo-card" id="photo-manickavali">
+        <h3>A Mangrove Tree and Its Functions</h3>
+        <img src="mhl.png" alt="A Mangrove Tree and Its Functions" onerror="this.onerror=null; this.src='https://placehold.co/600x400/2E7D32/white?text=🎨+Manickavalli\'s+Drawing';">
+        <div class="attribution-row">
+            <p class="attribution">By Manickavalli Alagappan</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-manickavali')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+    <!-- PHOTO 4: CROCHET MANGROVE SEED -->
+    <div class="photo-card" id="photo-mahalakshmi">
+        <h3>Crochet Mangrove Seed</h3>
+        <img src="mnk-img.png" alt="Crochet Mangrove Seed" onerror="this.onerror=null; this.src='https://placehold.co/600x400/2E7D32/white?text=🧶+Mahalackshmi\'s+Crochet';">
+        <div class="attribution-row">
+            <p class="attribution">By Mahalackshmi Alagappan</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-mahalakshmi')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+    <!-- PHOTO 5: A MANGROVE DRAWING -->
+    <div class="photo-card" id="photo-nazara">
+        <h3>A Mangrove Drawing</h3>
+        <img src="nzr-img.png" alt="A Mangrove Drawing" onerror="this.onerror=null; this.src='https://placehold.co/600x400/2E7D32/white?text=🎨+Nazara\'s+Drawing';">
+        <div class="attribution-row">
+            <p class="attribution">By Nazara Deepak</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-nazara')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+    <!-- PHOTO 6: SAVE MANGROVES -->
+    <div class="photo-card" id="photo-samuel">
+        <h3>Save Mangroves</h3>
+        <img src="sml.png" alt="Save Mangroves" onerror="this.onerror=null; this.src='https://placehold.co/600x400/2E7D32/white?text=🎨+Samuel\'s+Drawing';">
+        <div class="attribution-row">
+            <p class="attribution">By Samuel William Joel</p>
+            <button class="like-btn" onclick="toggleLike(this)"><span class="like-icon">🤍</span> <span class="like-count">0</span></button>
+            <button class="share-btn" onclick="copyLink('photo-samuel')">🔗 Copy Link</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // FUN FACTS ROTATOR LOGIC
+    const facts = [
+        "💡 Fact: Mangroves store up to 4 times more carbon than tropical rainforests!",
+        "🌊 Fact: Mangrove roots act as natural barriers, reducing wave energy by up to 66% during storms!",
+        "🐟 Fact: Over 75% of commercially caught tropical fish species spend time in mangrove nurseries!",
+        "🧂 Fact: Some mangrove species can filter out up to 90% of sea salt through their roots!",
+        "🌱 Fact: Mangrove seeds (propagules) can float in ocean saltwater for over a year before taking root!",
+        "🌍 Fact: World Mangrove Day is celebrated globally every year on July 26th!"
+    ];
+    let currentFactIndex = 0;
+
+    function updateFactDisplay() {
+        const factText = document.getElementById('factText');
+        factText.style.opacity = '0';
+        setTimeout(() => {
+            factText.innerText = facts[currentFactIndex];
+            factText.style.opacity = '1';
+        }, 200);
+    }
+
+    function nextFact() {
+        currentFactIndex = (currentFactIndex + 1) % facts.length;
+        updateFactDisplay();
+    }
+
+    function prevFact() {
+        currentFactIndex = (currentFactIndex - 1 + facts.length) % facts.length;
+        updateFactDisplay();
+    }
+
+    setInterval(nextFact, 5000);
+
+    // REAL LIKES LOGIC (STARTS CLEAN AT 0, PERSISTS USER LIKES)
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.showcase-item, .photo-card').forEach(item => {
+            const id = item.id;
+            const likeBtn = item.querySelector('.like-btn');
+            if (!likeBtn) return;
+            const countSpan = item.querySelector('.like-count');
+            const iconSpan = item.querySelector('.like-icon');
+            
+            const userHasLiked = localStorage.getItem('liked_' + id) === 'true';
+            
+            if (userHasLiked) {
+                countSpan.innerText = '1';
+                likeBtn.classList.add('liked');
+                iconSpan.innerText = '❤️';
+            } else {
+                countSpan.innerText = '0';
+                likeBtn.classList.remove('liked');
+                iconSpan.innerText = '🤍';
+            }
+        });
+    });
+
+    function toggleLike(btn) {
+        const parent = btn.closest('.showcase-item') || btn.closest('.photo-card');
+        const id = parent.id;
+        const countSpan = btn.querySelector('.like-count');
+        const iconSpan = btn.querySelector('.like-icon');
+        
+        let userHasLiked = localStorage.getItem('liked_' + id) === 'true';
+        
+        if (!userHasLiked) {
+            userHasLiked = true;
+            countSpan.innerText = '1';
+            btn.classList.add('liked');
+            iconSpan.innerText = '❤️';
+            
+            let plusOne = document.createElement('span');
+            plusOne.className = 'plus-one';
+            plusOne.innerText = '+1 ❤️';
+            btn.appendChild(plusOne);
+            setTimeout(() => plusOne.remove(), 800);
+        } else {
+            userHasLiked = false;
+            countSpan.innerText = '0';
+            btn.classList.remove('liked');
+            iconSpan.innerText = '🤍';
+        }
+        
+        localStorage.setItem('liked_' + id, userHasLiked);
+    }
+
+    // CUSTOM CURSOR & TRAIL LOGIC
+    const cursor = document.querySelector('.custom-cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        createTrailDot(e.clientX, e.clientY);
+    });
+
+    function createTrailDot(x, y) {
+        const dot = document.createElement('div');
+        dot.className = 'trail-dot';
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        document.body.appendChild(dot);
+
+        setTimeout(() => {
+            dot.style.transform = 'translate(-50%, -50%) scale(0)';
+            dot.style.opacity = '0';
+        }, 50);
+
+        setTimeout(() => {
+            dot.remove();
+        }, 350);
+    }
+
+    // SEARCH FILTER LOGIC
+    function filterShowcase() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let items = document.querySelectorAll('.showcase-item, .photo-card');
+
+        for (let i = 0; i < items.length; i++) {
+            let text = items[i].innerText.toLowerCase();
+            if (text.includes(input)) {
+                items[i].style.display = "block";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    }
+
+    // CATEGORY CHIP FILTER
+    function filterCategory(category, btn) {
+        let buttons = document.querySelectorAll('.filter-btn');
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        let items = document.getElementsByClassName('showcase-item');
+        for (let i = 0; i < items.length; i++) {
+            if (category === 'all' || items[i].getAttribute('data-category') === category) {
+                items[i].style.display = "block";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    }
+
+    // RANDOM WORK PICKER WITH CONFETTI
+    function pickRandomWork() {
+        let items = Array.from(document.querySelectorAll('.showcase-item, .photo-card')).filter(i => i.style.display !== 'none');
+        if (items.length === 0) return;
+
+        document.querySelectorAll('.showcase-item, .photo-card').forEach(i => i.classList.remove('highlight'));
+
+        let randomItem = items[Math.floor(Math.random() * items.length)];
+        randomItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        randomItem.classList.add('highlight');
+
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        setTimeout(() => {
+            randomItem.classList.remove('highlight');
+        }, 3000);
+    }
+
+    // TEXT TO SPEECH (READ ALOUD)
+    function readAloud(btn) {
+        let parent = btn.closest('.showcase-item');
+        let title = parent.querySelector('h3').innerText;
+        let body = parent.querySelector('.poem-body').innerText;
+        let textToRead = title + ". " + body;
+
+        window.speechSynthesis.cancel();
+
+        if (btn.innerText.includes('Stop')) {
+            btn.innerText = '🔊 Read Aloud';
+            return;
+        }
+
+        document.querySelectorAll('.speech-btn').forEach(b => b.innerText = '🔊 Read Aloud');
+
+        let utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 0.9;
+        btn.innerText = '⏹️ Stop';
+
+        utterance.onend = () => {
+            btn.innerText = '🔊 Read Aloud';
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // COPY LINK TO CLIPBOARD + TOAST
+    function copyLink(id) {
+        const url = window.location.origin + window.location.pathname + '#' + id;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast("Direct link copied! 🔗");
+        });
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.className = 'show';
+        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 2500);
+    }
+
+    // DARK / LIGHT MODE TOGGLE
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const themeBtn = document.querySelector('.top-left-theme-btn');
+        if (document.body.classList.contains('dark-mode')) {
+            themeBtn.innerText = '☀️ Light Mode';
+        } else {
+            themeBtn.innerText = '🌙 Dark Mode';
+        }
+    }
+
+    // MODAL LOGIC
+    function openInfo(title, text) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalText').innerText = text;
+        document.getElementById('infoModal').style.display = 'flex';
+    }
+
+    function closeInfo() {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+
+    // FULL PAGE OVERLAY LOGIC
+    function openFullPageInfo() {
+        document.getElementById('fullPageOverlay').style.display = 'block';
+    }
+
+    function closeFullPageInfo() {
+        document.getElementById('fullPageOverlay').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
